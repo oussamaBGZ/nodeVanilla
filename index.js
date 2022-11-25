@@ -1,8 +1,8 @@
 const http = require("http");
 const routes = require("./router");
-const PORT = 3000;
 const hostname = "127.0.0.1";
 const scheme = "http";
+const config= require('./config')
 
 http
   .createServer((req, res) => {
@@ -32,6 +32,6 @@ http
       return routes["notfound"](data, res);
     });
   })
-  .listen(PORT, hostname, () =>
-    console.log("server is runing in port " + PORT)
+  .listen(config.PORT, hostname, () =>
+    console.log(`server is runing in ${config.envName} on port ${config.PORT}` )
   );
