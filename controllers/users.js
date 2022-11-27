@@ -53,7 +53,7 @@ const putUser = async (req, res) => {
     if (!payload) return response(res, "missing payload", 400)
 
     const data = JSON.parse(payload)
-    if (!data?.username || !data?.password || !data?.phone) return response(res, "username or password or phone is missing", 400)
+    if (!data?.username) return response(res, "username phone is missing", 400)
 
     const filepath = __dirname + '/../data/users/' + data.username + ".json"
     const checkifuser = fs.existsSync(filepath)
@@ -106,7 +106,7 @@ const login = async (req, res) => {
     if (!fs.existsSync(userPath)) return response(res, "username is wrong", 400)
 
     const user = fs.readFileSync(userPath, 'utf8')
-    const userParsed=JSON.parse(user)
+    const userParsed = JSON.parse(user)
 
     const checkIfPasswordMatch = hash(JSON.stringify(data.password)) === userParsed.password
 
@@ -131,10 +131,40 @@ const login = async (req, res) => {
 
 }
 
+const authonticated = (req, res, cb) => {
+    const {
+        headers,
+    } = req;
+    const tokenPath = __dirname + '/../data/tokens/' + headers.token + ".json"
+
+    if (!fs.existsSync(tokenPath)) return response(res, 'token not found', 400)
+
+    try {
+        const tokenData = fs.readFileSync(tokenPath)
+        if (JSON.parse(tokenData).expireDate < Date.now()) return response(res, 'You are not authonticated', 400)
+
+        cb(JSON.parse(tokenData).username)
+    }
+    catch (err) {
+        console.error(err)
+    }
+}
+
+const authorized = (req, res, user, cb) => {
+    const {
+        payload,
+    } = req;
+
+    if (JSON.parse(payload).username !== user) return response(res, 'You are not authorized data belongs to other user', 403)
+    cb()
+}
+
 module.exports = {
     getUser,
     postUser,
     putUser,
     deleteUser,
-    login
+    login,
+    authorized,
+    authonticated
 }
