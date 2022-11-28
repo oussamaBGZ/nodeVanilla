@@ -1,3 +1,4 @@
+const { addChecks } = require("./controllers/checks");
 const { getUser, postUser, putUser, deleteUser, login, authonticated, authorized } = require("./controllers/users");
 const { home, notFound } = require("./handlers");
 const routes = {
@@ -7,7 +8,8 @@ const routes = {
   },
   "POST": {
     "/user": postUser,
-    "/login": login
+    "/login": login,
+    "/checks": (req, res) => authonticated(req, res,(user) => addChecks({...req, user}, res))
   },
   "PUT": {
     "/user": (req, res) => authonticated(req, res, (user) => authorized(req, res, user, () => putUser(req, res))),
@@ -15,7 +17,6 @@ const routes = {
   "DELETE": {
     "/user": deleteUser,
   },
-
   "notfound": notFound,
 };
 
